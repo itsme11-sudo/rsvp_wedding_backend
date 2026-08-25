@@ -33,7 +33,9 @@ function reservationsToCsv(reservations) {
     reservation.updatedAt?.toISOString(),
   ]);
 
-  return [headings, ...rows].map((row) => row.map(csvCell).join(",")).join("\n");
+  return [headings, ...rows]
+    .map((row) => row.map(csvCell).join(","))
+    .join("\n");
 }
 
 export async function submitReservation(req, res, next) {
@@ -102,7 +104,7 @@ export async function getReservations(req, res, next) {
         "Content-Type": "text/csv; charset=utf-8",
         "Content-Disposition": 'attachment; filename="wedding-rsvps.csv"',
       });
-      return res.send(reservationsToCsv(reservations));
+      return res.send(`\uFEFF${reservationsToCsv(reservations)}`);
     }
 
     const attending = reservations.filter((item) => item.isAttending);

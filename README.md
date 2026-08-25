@@ -71,10 +71,26 @@ curl 'http://localhost:3000/api/reservations?format=csv' \
   -o wedding-rsvps.csv
 ```
 
-## Render deployment
+## Railway deployment
 
-- Root directory: `backend`
 - Build command: `npm install`
 - Start command: `npm start`
-- Add all values from `.env.example` as Render environment variables.
-- Add the Render service's outbound IP ranges to the Atlas Network Access list.
+- Add all values from `.env.example` under the Railway service's Variables tab.
+- Set `FRONTEND_ORIGIN` to the frontend's exact browser origin. Multiple origins
+  are comma-separated, for example:
+
+  ```env
+  FRONTEND_ORIGIN=https://ianafk.com,https://www.ianafk.com
+  ```
+
+  Use only the origin: include `https://`, but do not include a path or trailing
+  slash. Add each local development URL explicitly when it uses a different
+  port.
+- Add Railway's outbound IP to the Atlas Network Access list, or use Atlas's
+  broader network rule if the Railway plan does not provide a static IP.
+
+The frontend must set `VITE_API_URL` to the Railway API origin, without `/api`:
+
+```env
+VITE_API_URL=https://rsvpweddingbackend-rsvp-backend.up.railway.app
+```

@@ -9,7 +9,8 @@ export function createApp() {
   const app = express();
   const allowedOrigins = (process.env.FRONTEND_ORIGIN ?? "http://localhost:5173")
     .split(",")
-    .map((origin) => origin.trim());
+    .map((origin) => origin.trim().replace(/\/$/, ""))
+    .filter(Boolean);
 
   app.disable("x-powered-by");
   app.use(cors({ origin: allowedOrigins }));
