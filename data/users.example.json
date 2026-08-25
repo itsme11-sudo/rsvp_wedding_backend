@@ -1,0 +1,14 @@
+[
+  {
+    "code": "ADMIN-DEMO-CODE",
+    "name": "Wedding Admin",
+    "reservedSeats": 2,
+    "role": "admin"
+  },
+  {
+    "code": "DELA-CRUZ-2026",
+    "name": "The Dela Cruz Family",
+    "reservedSeats": 4,
+    "role": "invited"
+  }
+]
