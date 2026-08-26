@@ -3,12 +3,14 @@
     "code": "ADMIN-DEMO-CODE",
     "name": "Wedding Admin",
     "reservedSeats": 2,
-    "role": "admin"
+    "role": "admin",
+    "invitationRole": "guest"
   },
   {
     "code": "DELA-CRUZ-2026",
     "name": "The Dela Cruz Family",
     "reservedSeats": 4,
-    "role": "invited"
+    "role": "invited",
+    "invitationRole": "principal-sponsor"
   }
 ]

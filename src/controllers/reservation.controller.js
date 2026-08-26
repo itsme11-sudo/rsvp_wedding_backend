@@ -11,6 +11,7 @@ function csvCell(value) {
 function reservationsToCsv(reservations) {
   const headings = [
     "Invitation name",
+    "Invitation role",
     "Reserved seats",
     "RSVP name",
     "Email",
@@ -23,6 +24,7 @@ function reservationsToCsv(reservations) {
 
   const rows = reservations.map((reservation) => [
     reservation.user?.name,
+    reservation.user?.invitationRole ?? "guest",
     reservation.user?.reservedSeats,
     reservation.name,
     reservation.email,
@@ -96,7 +98,7 @@ export async function submitReservation(req, res, next) {
 export async function getReservations(req, res, next) {
   try {
     const reservations = await Reservation.find()
-      .populate("user", "name reservedSeats role")
+      .populate("user", "name reservedSeats role invitationRole")
       .sort({ updatedAt: -1 });
 
     if (req.query.format === "csv") {

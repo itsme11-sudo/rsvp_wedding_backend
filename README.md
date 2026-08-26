@@ -37,6 +37,36 @@ Each invitation can submit only once. Code validation returns
 `409`. Guests must contact the bride or groom if a saved response needs to be
 changed.
 
+## Invitation roles
+
+The `users` collection keeps two different role fields:
+
+- `role` controls application access and remains either `admin` or `invited`.
+- `invitationRole` personalizes the wedding invitation. Existing records with
+  no value are treated as `guest` and receive the generic message.
+
+Accepted `invitationRole` identifiers are:
+
+```text
+guest
+principal-sponsor
+secondary-sponsor
+bridesmaid
+coin-bearer
+mother-of-the-bride
+father-of-the-bride
+matron-of-honor
+maid-of-honor
+bible-bearer
+cord-sponsor
+veil-sponsor
+candle-sponsor
+flower-girl
+```
+
+The seeder also accepts readable labels such as `Principal Sponsor`, `Cord`,
+`Bride's maid`, and `Flower Girl`, then stores the canonical identifier.
+
 ## Example requests
 
 Validate a code:

@@ -11,7 +11,7 @@ export async function validateUserCode(req, res, next) {
     }
 
     const user = await User.findOne({ codeHash: hashCode(code) }).select(
-      "name reservedSeats role",
+      "name reservedSeats role invitationRole",
     );
 
     if (!user) {
@@ -28,6 +28,7 @@ export async function validateUserCode(req, res, next) {
         name: user.name,
         reservedSeats: user.reservedSeats,
         role: user.role,
+        invitationRole: user.invitationRole ?? "guest",
         hasSubmittedRsvp,
       },
     });

@@ -1,8 +1,8 @@
 import mongoose from "mongoose";
+import { INVITATION_ROLES } from "../constants/invitation-roles.js";
 
 const userSchema = new mongoose.Schema(
   {
-    // Invitation codes are sensitive, so only their hashes are stored.
     codeHash: {
       type: String,
       required: true,
@@ -25,6 +25,12 @@ const userSchema = new mongoose.Schema(
       type: String,
       enum: ["admin", "invited"],
       default: "invited",
+      index: true,
+    },
+    invitationRole: {
+      type: String,
+      enum: INVITATION_ROLES,
+      default: "guest",
       index: true,
     },
   },
