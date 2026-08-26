@@ -51,6 +51,10 @@ Accepted `invitationRole` identifiers are:
 guest
 principal-sponsor
 secondary-sponsor
+father-of-the-groom
+mother-of-the-groom
+best-man
+groomsman
 bridesmaid
 coin-bearer
 mother-of-the-bride
@@ -66,6 +70,27 @@ flower-girl
 
 The seeder also accepts readable labels such as `Principal Sponsor`, `Cord`,
 `Bride's maid`, and `Flower Girl`, then stores the canonical identifier.
+
+When one invitation contains named entourage members—or one person has more
+than one responsibility—use `invitationRoles`:
+
+```json
+{
+  "invitationRoles": [
+    {
+      "name": "Juan Dela Cruz",
+      "roles": ["cord-sponsor", "groomsman"]
+    },
+    {
+      "name": "Maria Dela Cruz",
+      "roles": ["cord-sponsor", "bridesmaid"]
+    }
+  ]
+}
+```
+
+The singular `invitationRole` remains supported for existing records. New
+family and entourage invitations should use the named array structure.
 
 ## Example requests
 

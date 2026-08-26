@@ -11,6 +11,16 @@
     "name": "The Dela Cruz Family",
     "reservedSeats": 4,
     "role": "invited",
-    "invitationRole": "principal-sponsor"
+    "invitationRole": "guest",
+    "invitationRoles": [
+      {
+        "name": "Juan Dela Cruz",
+        "roles": ["cord-sponsor", "groomsman"]
+      },
+      {
+        "name": "Maria Dela Cruz",
+        "roles": ["cord-sponsor", "bridesmaid"]
+      }
+    ]
   }
 ]

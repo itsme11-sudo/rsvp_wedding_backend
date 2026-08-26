@@ -24,7 +24,11 @@ function reservationsToCsv(reservations) {
 
   const rows = reservations.map((reservation) => [
     reservation.user?.name,
-    reservation.user?.invitationRole ?? "guest",
+    reservation.user?.invitationRoles?.length
+      ? reservation.user.invitationRoles
+          .map((assignment) => `${assignment.name}: ${assignment.roles.join(" + ")}`)
+          .join("; ")
+      : reservation.user?.invitationRole ?? "guest",
     reservation.user?.reservedSeats,
     reservation.name,
     reservation.email,
@@ -98,7 +102,10 @@ export async function submitReservation(req, res, next) {
 export async function getReservations(req, res, next) {
   try {
     const reservations = await Reservation.find()
-      .populate("user", "name reservedSeats role invitationRole")
+      .populate(
+        "user",
+        "name reservedSeats role invitationRole invitationRoles",
+      )
       .sort({ updatedAt: -1 });
 
     if (req.query.format === "csv") {

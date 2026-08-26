@@ -3,7 +3,10 @@ import { readFile } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { connectToDatabase, disconnectFromDatabase } from "../config/database.js";
-import { normalizeInvitationRole } from "../constants/invitation-roles.js";
+import {
+  normalizeInvitationRole,
+  normalizeInvitationRoleAssignments,
+} from "../constants/invitation-roles.js";
 import { User } from "../models/user.model.js";
 import { hashCode, normalizeCode } from "../utils/code.js";
 
@@ -26,20 +29,22 @@ async function seedUsers() {
     const reservedSeats = Number(entry.reservedSeats);
     const role = entry.role ?? "invited";
     const invitationRole = normalizeInvitationRole(entry.invitationRole ?? "guest");
+    const invitationRoles = normalizeInvitationRoleAssignments(entry.invitationRoles);
 
     if (
       !code ||
       !name ||
       !Number.isInteger(reservedSeats) ||
       reservedSeats < 1 ||
-      !invitationRole
+      !invitationRole ||
+      !invitationRoles
     ) {
       throw new Error(`Invalid seed user: ${JSON.stringify(entry)}`);
     }
 
     await User.findOneAndUpdate(
       { codeHash: hashCode(code) },
-      { $set: { name, reservedSeats, role, invitationRole } },
+      { $set: { name, reservedSeats, role, invitationRole, invitationRoles } },
       { upsert: true, runValidators: true },
     );
   }
