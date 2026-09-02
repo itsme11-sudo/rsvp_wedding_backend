@@ -45,6 +45,10 @@ const reservationSchema = new mongoose.Schema(
       maxlength: 1000,
       default: "",
     },
+    reminderSentAt: {
+      type: Date,
+      default: null,
+    },
   },
   { timestamps: true, versionKey: false },
 );

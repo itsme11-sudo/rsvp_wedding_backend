@@ -8,12 +8,19 @@ A small Express API backed by MongoDB Atlas. MongoDB creates the `users` and
 | Method | Route | Access | Purpose |
 |---|---|---|---|
 | `POST` | `/api/users/validate` | Public, rate-limited | Validate a code and return safe invitation details |
+| `POST` | `/api/users` | Admin code | Create one invited guest without updating existing accounts |
 | `POST` | `/api/reservations` | Invitation code | Submit the code owner's one-time RSVP |
+| `POST` | `/api/reservations/reminders` | Admin code | Send one reminder to attending guests who have not received it |
 | `GET` | `/api/reservations` | Admin code | Return RSVP totals and records |
 | `GET` | `/api/reservations?format=csv` | Admin code | Download an Excel-compatible CSV |
 
 The code for a reservation can be supplied in the JSON body as `code`. For the
 admin GET route, supply it in the `x-invitation-code` header.
+
+The reminder route accepts the admin `code` in its JSON body. It selects only
+`isAttending: true` reservations whose reminder has not been sent, sends the
+personalized burgundy email in Resend batches, and records `reminderSentAt` for
+successful sends. Declined guests are never included.
 
 After the RSVP is saved, Resend sends a confirmation to the guest's submitted
 email address. If `RSVP_NOTIFICATION_EMAIL` is configured, a separate copy of
@@ -27,6 +34,21 @@ be an inbox the couple checks for replies.
 3. Copy `data/users.example.json` to `data/users.json` and replace the samples.
 4. Run `npm run seed:users`.
 5. Run `npm run dev`.
+
+To import or update only one code without applying the other entries in
+`data/users.json`, use the targeted mode:
+
+```sh
+npm run seed:users -- --only Hanze
+```
+
+Only the matching account is upserted; all other MongoDB user records are left
+unchanged.
+
+The admin dashboard uses `POST /api/users` to create individual invitation
+accounts. The admin code is supplied through `x-invitation-code`; the new
+guest's code is supplied as `invitationCode` in the JSON body. The endpoint
+hashes the new code and returns `409` rather than overwriting an existing user.
 
 Invitation codes are normalized to uppercase and stored only as SHA-256 hashes.
 Keep the original codes in your private guest list because they cannot be read

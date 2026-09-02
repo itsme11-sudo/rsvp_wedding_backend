@@ -2,6 +2,7 @@ import { Router } from "express";
 import {
   getReservations,
   submitReservation,
+  sendWeddingReminders,
 } from "../controllers/reservation.controller.js";
 import {
   requireAdmin,
@@ -11,4 +12,10 @@ import {
 export const reservationRouter = Router();
 
 reservationRouter.post("/", requireInvitationCode, submitReservation);
+reservationRouter.post(
+  "/reminders",
+  requireInvitationCode,
+  requireAdmin,
+  sendWeddingReminders,
+);
 reservationRouter.get("/", requireInvitationCode, requireAdmin, getReservations);

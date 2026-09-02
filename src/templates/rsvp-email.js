@@ -1,3 +1,5 @@
+import { GOOGLE_CALENDAR_URL } from "../constants/calendar.js";
+
 const COLORS = {
   ivory: "#f7f2e9",
   paper: "#fffdf8",
@@ -81,12 +83,65 @@ function reservationDetails(reservation) {
   };
 }
 
+const ROLE_REMINDER_ACTIONS = {
+  "principal-sponsor": "stand with us as one of our Principal Sponsors",
+  "secondary-sponsor": "take part as one of our Secondary Sponsors",
+  "father-of-the-groom": "celebrate with us as the Father of the Groom",
+  "mother-of-the-groom": "celebrate with us as the Mother of the Groom",
+  "best-man": "stand beside us as our Best Man",
+  groomsman: "stand with us as one of our Groomsmen",
+  bridesmaid: "stand with us as one of our Bridesmaids",
+  "coin-bearer": "serve as our Coin Bearer",
+  "mother-of-the-bride": "celebrate with us as the Mother of the Bride",
+  "father-of-the-bride": "celebrate with us as the Father of the Bride",
+  "matron-of-honor": "stand beside us as our Matron of Honor",
+  "maid-of-honor": "stand beside us as our Maid of Honor",
+  "bible-bearer": "serve as our Bible Bearer",
+  "cord-sponsor": "take part in the Cord ceremony",
+  "veil-sponsor": "take part in the Veil ceremony",
+  "candle-sponsor": "take part in the Candle ceremony",
+  "flower-girl": "join us as our Flower Girl",
+};
+
+function joinWithAnd(items) {
+  if (items.length <= 1) return items[0] ?? "";
+  if (items.length === 2) return `${items[0]} and ${items[1]}`;
+  return `${items.slice(0, -1).join(", ")}, and ${items.at(-1)}`;
+}
+
+function weddingRoleReminder(user) {
+  const assignments = user?.invitationRoles?.length
+    ? user.invitationRoles
+    : user?.invitationRole && user.invitationRole !== "guest"
+      ? [{ name: user.name, roles: [user.invitationRole] }]
+      : [];
+
+  const participation = assignments
+    .map((assignment) => {
+      const actions = (assignment.roles ?? [])
+        .map((role) => ROLE_REMINDER_ACTIONS[role])
+        .filter(Boolean);
+      return actions.length
+        ? `${assignment.name} will ${joinWithAnd(actions)}`
+        : "";
+    })
+    .filter(Boolean);
+
+  if (!participation.length) return "";
+
+  return `Your invitation is especially meaningful to us: ${joinWithAnd(participation)}. Thank you for taking such a special part in our celebration.`;
+}
+
 export function buildGuestRsvpEmail(reservation) {
   const details = reservationDetails(reservation);
   const safeName = escapeHtml(reservation.name);
+  const attending = Boolean(reservation.isAttending);
+  const responseMessage = attending
+    ? "Thank you for responding to our wedding invitation. Your RSVP has been received, and we are grateful to have you as part of this special chapter in our lives."
+    : "Thank you for letting us know. Although we will miss having you with us on our wedding day, we completely understand and truly appreciate you taking the time to respond.";
   const content = `
     <p style="margin:0 0 18px;color:${COLORS.ink};font-family:Georgia,'Times New Roman',serif;font-size:21px;line-height:1.5;">Dear ${safeName},</p>
-    <p style="margin:0 0 28px;color:${COLORS.muted};font-size:15px;line-height:1.8;text-align:center;">Thank you for responding to our wedding invitation. Your RSVP has been received, and we are grateful to have you as part of this special chapter in our lives.</p>
+    <p style="margin:0 0 28px;color:${COLORS.muted};font-size:15px;line-height:1.8;text-align:center;">${responseMessage}</p>
     <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="width:100%;margin:0 0 30px;padding:8px 24px;background:#faf6ef;border:1px solid ${COLORS.line};">
       ${summaryRow("Attendance", details.attendance)}
       ${summaryRow("Total party size", details.partySize)}
@@ -101,7 +156,7 @@ export function buildGuestRsvpEmail(reservation) {
     text: [
       `Dear ${reservation.name},`,
       "",
-      "Thank you for responding to our wedding invitation. Your RSVP has been received.",
+      responseMessage,
       `Attendance: ${details.attendance}`,
       `Total party size: ${details.partySize}`,
       `Companions: ${details.companionNames}`,
@@ -116,7 +171,9 @@ export function buildGuestRsvpEmail(reservation) {
       eyebrow: "Wedding RSVP Confirmation",
       title: "Thank you for your response",
       content,
-      footer: "We look forward to celebrating this beautiful day with the people closest to our hearts.",
+      footer: attending
+        ? "We look forward to celebrating this beautiful day with the people closest to our hearts."
+        : "We will miss you on the day, and we are grateful for your warm wishes from afar.",
     }),
   };
 }
@@ -155,6 +212,60 @@ export function buildAdminRsvpEmail(reservation) {
       title: "A new RSVP has arrived",
       content,
       footer: "This is an automatic notification from your wedding RSVP website.",
+    }),
+  };
+}
+
+export function buildWeddingReminderEmail(reservation) {
+  const roleReminder = weddingRoleReminder(reservation.user);
+  const safeRoleReminder = roleReminder
+    ? `<p style="margin:0 0 26px;padding:20px 22px;border-left:3px solid ${COLORS.gold};background:#faf6ef;color:${COLORS.ink};font-family:Georgia,'Times New Roman',serif;font-size:16px;line-height:1.7;">${escapeHtml(roleReminder)}</p>`
+    : "";
+  const content = `
+    <p style="margin:0 0 18px;color:${COLORS.ink};font-family:Georgia,'Times New Roman',serif;font-size:21px;line-height:1.5;">Dear ${escapeHtml(reservation.name)},</p>
+    <p style="margin:0 0 28px;color:${COLORS.muted};font-size:15px;line-height:1.8;text-align:center;">Thank you for confirming your RSVP. We are so glad that you will be joining us, and we would love to share this gentle reminder for our big day.</p>
+    <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="width:100%;margin:0 0 28px;background:${COLORS.wine};color:#fffaf2;text-align:center;">
+      <tr>
+        <td style="padding:26px 20px;">
+          <div style="margin-bottom:8px;color:#e8d6b4;font-size:11px;font-weight:bold;letter-spacing:2px;text-transform:uppercase;">Save the date</div>
+          <div style="font-family:Georgia,'Times New Roman',serif;font-size:26px;line-height:1.35;">Friday, September 18, 2026</div>
+          <div style="margin-top:9px;font-size:13px;line-height:1.6;">Guest arrival at 1:00 PM · Ceremony at 1:30 PM</div>
+        </td>
+      </tr>
+    </table>
+    ${safeRoleReminder}
+    <p style="margin:0 0 22px;color:${COLORS.muted};font-size:14px;line-height:1.8;text-align:center;">Add our wedding to your Google Calendar now, and please check our wedding website for the complete celebration details.</p>
+    <p style="margin:0 0 30px;text-align:center;"><a href="${escapeHtml(GOOGLE_CALENDAR_URL)}" target="_blank" style="display:inline-block;padding:15px 25px;border-radius:999px;color:${COLORS.wineDark};background:#d6bc8b;font-size:13px;font-weight:bold;line-height:1.2;text-decoration:none;">Add to Google Calendar</a></p>
+    <p style="margin:0;color:${COLORS.muted};font-size:14px;line-height:1.8;text-align:center;">If you have any concerns or need to make changes, please contact the bride or groom directly.</p>
+    <div style="width:44px;height:1px;margin:30px auto 22px;background:${COLORS.gold};"></div>
+    <p style="margin:0;color:${COLORS.wine};font-family:Georgia,'Times New Roman',serif;font-size:21px;line-height:1.5;text-align:center;font-style:italic;">With love,<br>Kiko &amp; Lec</p>`;
+
+  return {
+    subject: "A reminder for Kiko & Lec's wedding — September 18, 2026",
+    text: [
+      `Dear ${reservation.name},`,
+      "",
+      "Thank you for confirming your RSVP. We are so glad that you will be joining us, and we would love to share this gentle reminder for our big day.",
+      "",
+      "Friday, September 18, 2026",
+      "Guest arrival at 1:00 PM · Ceremony at 1:30 PM",
+      ...(roleReminder ? ["", roleReminder] : []),
+      "",
+      "Add our wedding to your Google Calendar:",
+      GOOGLE_CALENDAR_URL,
+      "",
+      "Please check our wedding website for the complete celebration details.",
+      "If you have any concerns or need to make changes, please contact the bride or groom directly.",
+      "",
+      "With love,",
+      "Kiko & Lec",
+    ].join("\n"),
+    html: emailShell({
+      preheader: "A gentle reminder for our wedding on September 18, 2026.",
+      eyebrow: "Wedding Day Reminder",
+      title: "Our big day is almost here",
+      content,
+      footer: "Thank you for being part of this beautiful day. We cannot wait to celebrate with you.",
     }),
   };
 }

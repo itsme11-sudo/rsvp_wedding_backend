@@ -12,7 +12,27 @@ import { hashCode, normalizeCode } from "../utils/code.js";
 
 const currentDirectory = path.dirname(fileURLToPath(import.meta.url));
 const defaultFile = path.resolve(currentDirectory, "../../data/users.json");
-const inputFile = path.resolve(process.argv[2] ?? defaultFile);
+const argumentsList = process.argv.slice(2);
+let inputFileArgument;
+let requestedCode;
+
+for (let index = 0; index < argumentsList.length; index += 1) {
+  const argument = argumentsList[index];
+
+  if (argument === "--only") {
+    requestedCode = normalizeCode(argumentsList[index + 1]);
+    index += 1;
+    if (!requestedCode) {
+      throw new Error("--only requires an invitation code.");
+    }
+  } else if (!inputFileArgument) {
+    inputFileArgument = argument;
+  } else {
+    throw new Error(`Unexpected seeder argument: ${argument}`);
+  }
+}
+
+const inputFile = path.resolve(inputFileArgument ?? defaultFile);
 
 async function seedUsers() {
   const input = JSON.parse(await readFile(inputFile, "utf8"));
@@ -21,9 +41,17 @@ async function seedUsers() {
     throw new Error("The users seed file must be a non-empty JSON array.");
   }
 
+  const selectedUsers = requestedCode
+    ? input.filter((entry) => normalizeCode(entry.code) === requestedCode)
+    : input;
+
+  if (selectedUsers.length === 0) {
+    throw new Error(`Invitation code not found in the seed file: ${requestedCode}`);
+  }
+
   await connectToDatabase();
 
-  for (const entry of input) {
+  for (const entry of selectedUsers) {
     const code = normalizeCode(entry.code);
     const name = String(entry.name ?? "").trim();
     const reservedSeats = Number(entry.reservedSeats);
@@ -49,7 +77,9 @@ async function seedUsers() {
     );
   }
 
-  console.log(`Imported ${input.length} user(s).`);
+  console.log(
+    `Imported ${selectedUsers.length} user(s)${requestedCode ? ` for code ${requestedCode}` : ""}.`,
+  );
 }
 
 seedUsers()

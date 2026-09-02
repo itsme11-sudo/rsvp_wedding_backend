@@ -1,6 +1,9 @@
 import { Reservation } from "../models/reservation.model.js";
 import { RSVP_ALREADY_SUBMITTED_MESSAGE } from "../constants/messages.js";
-import { sendRsvpEmails } from "../services/email.service.js";
+import {
+  sendRsvpEmails,
+  sendWeddingReminderEmails,
+} from "../services/email.service.js";
 import { validateReservationInput } from "../utils/reservation-validation.js";
 
 function csvCell(value) {
@@ -19,6 +22,7 @@ function reservationsToCsv(reservations) {
     "Companions",
     "Companion names",
     "Notes",
+    "Reminder sent at",
     "Submitted at",
   ];
 
@@ -36,6 +40,7 @@ function reservationsToCsv(reservations) {
     reservation.companions,
     reservation.companionNames,
     reservation.notes,
+    reservation.reminderSentAt?.toISOString(),
     reservation.updatedAt?.toISOString(),
   ]);
 
@@ -125,9 +130,67 @@ export async function getReservations(req, res, next) {
         (total, item) => total + 1 + item.companions,
         0,
       ),
+      remindersSent: attending.filter((item) => item.reminderSentAt).length,
+      remindersPending: attending.filter((item) => !item.reminderSentAt).length,
     };
 
     res.json({ summary, reservations });
+  } catch (error) {
+    next(error);
+  }
+}
+
+export async function sendWeddingReminders(req, res, next) {
+  try {
+    const attendingCount = await Reservation.countDocuments({
+      isAttending: true,
+    });
+    const reservations = await Reservation.find({
+      isAttending: true,
+      reminderSentAt: null,
+    }).populate(
+      "user",
+      "name invitationRole invitationRoles",
+    );
+
+    if (reservations.length === 0) {
+      return res.json({
+        message:
+          attendingCount === 0
+            ? "There are no attending guests to remind yet."
+            : "All attending guests have already received the wedding reminder.",
+        eligible: attendingCount,
+        alreadySent: attendingCount,
+        sent: 0,
+        failed: 0,
+      });
+    }
+
+    const emailResult = await sendWeddingReminderEmails(reservations);
+    const reminderSentAt = new Date();
+
+    if (emailResult.sentIds.length) {
+      await Reservation.updateMany(
+        {
+          _id: { $in: emailResult.sentIds },
+          reminderSentAt: null,
+        },
+        { $set: { reminderSentAt } },
+      );
+    }
+
+    const sent = emailResult.sentIds.length;
+    const failed = emailResult.failedIds.length;
+
+    res.json({
+      message: failed
+        ? `${sent} reminder${sent === 1 ? " was" : "s were"} sent. ${failed} could not be sent and can be retried.`
+        : `${sent} wedding reminder${sent === 1 ? " was" : "s were"} sent successfully.`,
+      eligible: attendingCount,
+      alreadySent: attendingCount - reservations.length,
+      sent,
+      failed,
+    });
   } catch (error) {
     next(error);
   }
