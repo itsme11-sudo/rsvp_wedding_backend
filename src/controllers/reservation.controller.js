@@ -1,6 +1,10 @@
 import { Reservation } from "../models/reservation.model.js";
 import { RSVP_ALREADY_SUBMITTED_MESSAGE } from "../constants/messages.js";
 import {
+  isRsvpClosed,
+  RSVP_CLOSED_MESSAGE,
+} from "../constants/rsvp-deadline.js";
+import {
   sendRsvpEmails,
   sendWeddingReminderEmails,
 } from "../services/email.service.js";
@@ -59,6 +63,10 @@ export async function submitReservation(req, res, next) {
       return res.status(409).json({
         message: RSVP_ALREADY_SUBMITTED_MESSAGE,
       });
+    }
+
+    if (isRsvpClosed(req.rsvpNow)) {
+      return res.status(410).json({ message: RSVP_CLOSED_MESSAGE });
     }
 
     const validation = validateReservationInput(

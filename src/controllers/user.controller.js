@@ -1,4 +1,8 @@
 import { normalizeInvitationRole } from "../constants/invitation-roles.js";
+import {
+  isRsvpClosed,
+  RSVP_CLOSES_AT,
+} from "../constants/rsvp-deadline.js";
 import { User } from "../models/user.model.js";
 import { Reservation } from "../models/reservation.model.js";
 import { hashCode, normalizeCode } from "../utils/code.js";
@@ -110,6 +114,8 @@ export async function validateUserCode(req, res, next) {
         hasSubmittedRsvp,
         submittedRsvpIsAttending:
           submittedReservation?.isAttending ?? null,
+        rsvpClosed: isRsvpClosed(),
+        rsvpClosesAt: RSVP_CLOSES_AT,
       },
     });
   } catch (error) {

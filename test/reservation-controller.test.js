@@ -101,3 +101,46 @@ test("wedding reminders query only attending reservations that are not yet sent"
   assert.equal(responseBody.sent, 0);
   assert.equal(responseBody.failed, 1);
 });
+
+test("rejects a new RSVP after the Philippine-time deadline", async () => {
+  const originalExists = Reservation.exists;
+  const originalCreate = Reservation.create;
+  let createWasCalled = false;
+  let responseStatus;
+  let responseBody;
+
+  Reservation.exists = async () => null;
+  Reservation.create = async () => {
+    createWasCalled = true;
+  };
+
+  try {
+    await submitReservation(
+      {
+        invitedUser: { _id: "invited-user", reservedSeats: 1 },
+        body: {},
+        rsvpNow: new Date("2026-09-03T16:00:00.000Z"),
+      },
+      {
+        status(status) {
+          responseStatus = status;
+          return this;
+        },
+        json(body) {
+          responseBody = body;
+          return this;
+        },
+      },
+      (error) => {
+        throw error;
+      },
+    );
+  } finally {
+    Reservation.exists = originalExists;
+    Reservation.create = originalCreate;
+  }
+
+  assert.equal(responseStatus, 410);
+  assert.match(responseBody.message, /submissions are now closed/i);
+  assert.equal(createWasCalled, false);
+});

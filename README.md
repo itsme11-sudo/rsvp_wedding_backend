@@ -59,6 +59,11 @@ Each invitation can submit only once. Code validation returns
 `409`. Guests must contact the bride or groom if a saved response needs to be
 changed.
 
+New RSVP submissions remain open through September 3, 2026 in Philippine time
+and close at `2026-09-04T00:00:00+08:00`. The API returns HTTP `410` after the
+cutoff. Existing reservations, code validation, admin reporting, exports, guest
+creation, and reminders remain available.
+
 ## Invitation roles
 
 The `users` collection keeps two different role fields:
