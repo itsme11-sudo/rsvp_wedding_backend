@@ -10,6 +10,7 @@
     "dev": "node --watch src/server.js",
     "start": "node src/server.js",
     "seed:users": "node src/scripts/seed-users.js",
+    "email:sample": "node src/scripts/send-reminder-sample.js",
     "test": "node --test"
   },
   "dependencies": {

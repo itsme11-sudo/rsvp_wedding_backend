@@ -64,6 +64,22 @@ and close at `2026-09-04T00:00:00+08:00`. The API returns HTTP `410` after the
 cutoff. Existing reservations, code validation, admin reporting, exports, guest
 creation, and reminders remain available.
 
+## Send a reminder sample
+
+From the `backend` folder, run:
+
+```sh
+npm run email:sample
+```
+
+This sends one copy of the current wedding reminder to `lecamaisonline@gmail.com`,
+with the greeting "Dear Lec", using `RESEND_API_KEY` and `RESEND_FROM` from `.env`.
+It also uses `RSVP_REPLY_TO` when configured. To change the recipient or greeting,
+edit `recipient` and `recipientName` in `src/scripts/send-reminder-sample.js`.
+Each run sends another sample. The script does not connect to MongoDB or update
+guest reminder records. A success message means Resend accepted the email for
+delivery; check your inbox or spam folder.
+
 ## Invitation roles
 
 The `users` collection keeps two different role fields:

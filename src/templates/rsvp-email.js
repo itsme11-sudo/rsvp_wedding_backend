@@ -77,7 +77,9 @@ function reservationDetails(reservation) {
   const companions = Number(reservation.companions) || 0;
 
   return {
-    attendance: attending ? "Joyfully attending" : "Regretfully unable to attend",
+    attendance: attending
+      ? "Joyfully attending"
+      : "Regretfully unable to attend",
     partySize: attending ? String(1 + companions) : "0",
     companionNames: reservation.companionNames?.join(", ") || "None",
   };
@@ -147,7 +149,7 @@ export function buildGuestRsvpEmail(reservation) {
       ${summaryRow("Total party size", details.partySize)}
       ${summaryRow("Companions", details.companionNames, true)}
     </table>
-    <p style="margin:0;color:${COLORS.muted};font-size:14px;line-height:1.8;text-align:center;">If you have any concerns or need to make changes, please contact the bride or groom directly.</p>
+    <p style="margin:0;color:${COLORS.muted};font-size:14px;line-height:1.8;text-align:center;">If you have any questions or need to make changes to your RSVP, please contact the bride or groom directly.</p>
     <div style="width:44px;height:1px;margin:30px auto 22px;background:${COLORS.gold};"></div>
     <p style="margin:0;color:${COLORS.wine};font-family:Georgia,'Times New Roman',serif;font-size:21px;line-height:1.5;text-align:center;font-style:italic;">With love and gratitude,<br>Kiko &amp; Lec</p>`;
 
@@ -211,7 +213,8 @@ export function buildAdminRsvpEmail(reservation) {
       eyebrow: "Admin Notification",
       title: "A new RSVP has arrived",
       content,
-      footer: "This is an automatic notification from your wedding RSVP website.",
+      footer:
+        "This is an automatic notification from your wedding RSVP website.",
     }),
   };
 }
@@ -223,18 +226,18 @@ export function buildWeddingReminderEmail(reservation) {
     : "";
   const content = `
     <p style="margin:0 0 18px;color:${COLORS.ink};font-family:Georgia,'Times New Roman',serif;font-size:21px;line-height:1.5;">Dear ${escapeHtml(reservation.name)},</p>
-    <p style="margin:0 0 28px;color:${COLORS.muted};font-size:15px;line-height:1.8;text-align:center;">Thank you for confirming your RSVP. We are so glad that you will be joining us, and we would love to share this gentle reminder for our big day.</p>
+    <p style="margin:0 0 28px;color:${COLORS.muted};font-size:15px;line-height:1.8;text-align:center;">Thank you for confirming your RSVP. We're so happy that you'll be joining us, and we're excited to celebrate this special day with you.</p>
     <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="width:100%;margin:0 0 28px;background:${COLORS.wine};color:#fffaf2;text-align:center;">
       <tr>
         <td style="padding:26px 20px;">
-          <div style="margin-bottom:8px;color:#e8d6b4;font-size:11px;font-weight:bold;letter-spacing:2px;text-transform:uppercase;">Save the date</div>
+          <div style="margin-bottom:8px;color:#e8d6b4;font-size:11px;font-weight:bold;letter-spacing:2px;text-transform:uppercase;">Here's a friendly reminder <br/>of the wedding details:</div>
           <div style="font-family:Georgia,'Times New Roman',serif;font-size:26px;line-height:1.35;">Friday, September 18, 2026</div>
           <div style="margin-top:9px;font-size:13px;line-height:1.6;">Guest arrival at 1:00 PM · Ceremony at 1:30 PM</div>
         </td>
       </tr>
     </table>
     ${safeRoleReminder}
-    <p style="margin:0 0 22px;color:${COLORS.muted};font-size:14px;line-height:1.8;text-align:center;">Add our wedding to your Google Calendar now, and please check our wedding website for the complete celebration details.</p>
+    <p style="margin:0 0 22px;color:${COLORS.muted};font-size:14px;line-height:1.8;text-align:center;">Please add our wedding to your Google Calendar and visit our wedding website for complete celebration details.</p>
     <p style="margin:0 0 30px;text-align:center;"><a href="${escapeHtml(GOOGLE_CALENDAR_URL)}" target="_blank" style="display:inline-block;padding:15px 25px;border-radius:999px;color:${COLORS.wineDark};background:#d6bc8b;font-size:13px;font-weight:bold;line-height:1.2;text-decoration:none;">Add to Google Calendar</a></p>
     <p style="margin:0;color:${COLORS.muted};font-size:14px;line-height:1.8;text-align:center;">If you have any concerns or need to make changes, please contact the bride or groom directly.</p>
     <div style="width:44px;height:1px;margin:30px auto 22px;background:${COLORS.gold};"></div>
@@ -245,7 +248,7 @@ export function buildWeddingReminderEmail(reservation) {
     text: [
       `Dear ${reservation.name},`,
       "",
-      "Thank you for confirming your RSVP. We are so glad that you will be joining us, and we would love to share this gentle reminder for our big day.",
+      "Thank you for confirming your RSVP. We're so happy that you'll be joining us, and we're excited to celebrate this special day with you",
       "",
       "Friday, September 18, 2026",
       "Guest arrival at 1:00 PM · Ceremony at 1:30 PM",
@@ -263,9 +266,10 @@ export function buildWeddingReminderEmail(reservation) {
     html: emailShell({
       preheader: "A gentle reminder for our wedding on September 18, 2026.",
       eyebrow: "Wedding Day Reminder",
-      title: "Our big day is almost here",
+      title: "The countdown to our big day is officially on!",
       content,
-      footer: "Thank you for being part of this beautiful day. We cannot wait to celebrate with you.",
+      footer:
+        "Thank you for being part of this beautiful day. We cannot wait to celebrate with you.",
     }),
   };
 }
